@@ -1,0 +1,13 @@
+{
+    "stations": {
+        "vanish_rate": 0.5
+    },
+    "metro": {
+        "station_pool_size": 20,
+        "line_pool_size": 5,
+        "exit_pool_size": 5
+    },
+    "line": {
+        "min_draw_distance": 2
+    }
+}
