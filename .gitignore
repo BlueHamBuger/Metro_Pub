@@ -50,9 +50,6 @@ Thumbs.db
 # VS Code files
 #//////////////////////////
 
-.vscode/
-assets/Scripts/Manager/MetroManager/MetroLine.js
-
 
 #/////
 # METAS
