@@ -40,6 +40,12 @@ var GameManager = cc.Class({
         this.inputMng = this.initMng("InputManager", this.metro);
         this.inputMng.initManager(this);
 
+        this.playerMng = this.initMng("PlayerManager", this);
+        this.playerMng.initManager(this)
+
+        this.dataMng = this.initMng("DataManager", this);
+        this.dataMng.initManager(this)
+
         this.metroMng = this.initMng("MetroManager", this.metro);
         this.metroMng.initManager(this);
         // this.animMng = this.initMng("AnimationManager", this.node);
@@ -49,7 +55,6 @@ var GameManager = cc.Class({
         var mng = obj.getComponent(name);
         if (mng != null) return mng;
         var mng = obj.addComponent(name);
-
         return mng;
     },
     //游戏状态相关
@@ -94,6 +99,10 @@ var GameManager = cc.Class({
         copyAttr(require("MetroStation"), settings.stations)
         copyAttr(require("MetroManager"), settings.metro)
         copyAttr(require("MetroLine"), settings.line)
+        copyAttr(require("MetroCar"), settings.car)
+    },
+    loadData(entity) { // TODO 任何数据的获取 都需要加载完毕后才继续
+        return this.dataMng.loadData(entity)
     }
 
 

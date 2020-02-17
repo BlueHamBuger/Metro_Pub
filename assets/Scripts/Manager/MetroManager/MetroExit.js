@@ -35,7 +35,7 @@ var MetroExit = cc.Class({
         return delta
     },
     getWaitNumber(line) {
-        return line.cur_pop
+        return line.car.cur_pop
     },
 
 

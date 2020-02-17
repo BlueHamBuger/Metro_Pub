@@ -8,6 +8,13 @@
         "exit_pool_size": 5
     },
     "line": {
-        "min_draw_distance": 2
+        "min_draw_distance": 20
+    },
+    "car": {
+        "car_props": [{
+            "car_name": "初始车",
+            "speed": 1,
+            "cap_per_body": 50
+        }]
     }
 }

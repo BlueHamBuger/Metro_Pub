@@ -97,7 +97,8 @@ var Metro = cc.Class({
 
     initManager(gameMng) {
         this._super(gameMng)
-            // 对象池初始化
+
+        // 对象池初始化
         this._initPools();
         // 布局初始化
         this._initCells();
@@ -391,5 +392,10 @@ var Metro = cc.Class({
         //let cellindex = this.getCellIndex(line.car_pos)
         this.line_pool.put(line.node)
     },
+
+    // 上层接口封装
+    getCarInstance() {
+        return this.gameMng.loadData(this.gameMng.playerMng.car_selected)
+    }
 
 })
