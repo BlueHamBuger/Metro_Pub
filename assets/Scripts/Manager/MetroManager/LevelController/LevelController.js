@@ -46,7 +46,7 @@ var LevelController = cc.Class({ //
             //this.levelTest()
         this.levelOne()
     },
-    levelTest() { //TEST 
+    levelTest() { //TODO 删除TEST   
         let occupied_cells = this.metroMng.getOccupiedCells()
         let metroMng = this.metroMng
         if (occupied_cells.length == 0) {
