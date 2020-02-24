@@ -49,6 +49,12 @@ var MetroEntity = cc.Class({
         this._cur_pop = 0 // 该位置总共收纳的 人数
         this._tweens = [] // 保存 当前在执行的 tweens
     },
+    init() {
+        this.anim = this.getComponent(cc.Animation)
+        this.anim.on(cc.Animation.EventType.PLAY, this.onPlay, this)
+        this.anim.on(cc.Animation.EventType.STOP, this.onStop, this)
+        this.anim.on(cc.Animation.EventType.FINISHED, this.onFinished, this)
+    },
     //私有方法
     _clearTweens() {
         this._tweens.forEach(element => {
@@ -57,7 +63,6 @@ var MetroEntity = cc.Class({
             element.start()
         });
         this._tweens.length = 0
-
     },
     removeTween(tween) {
         this._tweens.remove(tween)
@@ -121,6 +126,16 @@ var MetroEntity = cc.Class({
         this._tweens.push(tween)
         return tween
     },
+    // animation 回调
+    onPlay(type, state) { // animation 回调
+
+    },
+    onStop(type, state) {
+
+    },
+    onFinished(type, state) {
+
+    }
 
 
 })

@@ -9,11 +9,11 @@
 //  - [English] https://www.cocos2d-x.org/docs/creator/manual/en/scripting/life-cycle-callbacks.html
 
 var am = require("AnimationManager")
-var States = window.LineStates = {
-    BUILD: "building", //建造中
-    RUN: "running", // 行驶中
-    WAIT: "waiting", // 接收乘客
-    DONE: "done" // 到达路线结尾
+var States = window.GB_LineStates = {
+    BUILD: 0, //建造中
+    RUN: 1, // 行驶中
+    WAIT: 2, // 接收乘客
+    DONE: 3 // 到达路线结尾
 }
 var MetroLine = cc.Class({
     extends: cc.Component,
@@ -35,19 +35,32 @@ var MetroLine = cc.Class({
     },
     ctor() {
         this.entities = []
-        this.cur_wait_time = 0 // 在站点上已经等待的时间
         this.car_pos = null
         this._state = States.BUILD
         this._next_state = States.BUILD // 下一个状态
-        this.route_points = [] // 记录路线上的关键点
+        this.passed_stations = 0
     },
     onLoad() {
-        this.graphic = this.node.getComponent("Drawing"); // 轨迹的图像处理类
-        //var scene = cc.director.getScene(); // 需要设置父物体 为场景
-        this.car = MetroLine.metro_mng.getCarInstance()
-        this.car.node.setParent(this.node)
+        this._initEffects()
+
     },
-    start() {},
+    _initEffects() { //TODO 分离表现层
+        this.graphic = this.node.getComponent("Drawing"); // 轨迹的图像处理类
+        this.graphic.init(this)
+        this.car = MetroLine.metro_mng.getCarInstance()
+        this.car.node.setParent(this.node.parent.parent)
+        let cnet_line_pre = MetroLine.metro_mng.getEffect(window.GB_Effect.CONNECT_LINE, 0) //TODO index 配置化
+        this.cnet_lines = function(that) { // 0到8 分别暗示 周边9个格子
+            let a = []
+            for (let i = 0; i < 9; i++) {
+                let cnet_line = cc.instantiate(cnet_line_pre)
+                cnet_line.setParent(that.node)
+                cnet_line.active = false
+                a.push(cnet_line)
+            }
+            return a
+        }(this)
+    },
     update(dt) {
         let pos = this.getCarPos()
         if (pos != null) this.car_pos = pos
@@ -61,38 +74,35 @@ var MetroLine = cc.Class({
         this.state = States.BUILD
         this._next_state = States.BUILD
         this.node.active = false
-        this.cur_wait_time = 0
         this.car_pos = null
         this.end_pos = null
-        this.route_points.length = 0
+        this.passed_stations = 0
     },
     reuse: function(speed, bandwidth) {
         this.speed = speed //TODO speed 将会从 车速 和 线路本身速度共同决定
         this.node.active = true;
     },
-
     // Manager 交互
     buildOver() { // 路线构建完毕  开始进行运输
+        if (!this.graphic.hasRoute()) { // 没有任何的行径路线
+            this.graphic.resetDrawing()
+            MetroLine.metro_mng.fadeLine(this)
+            return
+        }
         this._next_state = States.RUN
     },
-    build(pos) { // 根据对应的新位置来 构建路线
+    build(pos, entity) { // 根据对应的新位置来 构建路线
         if (this.car_pos == null)
             this.car_pos = pos
-        let length = this.route_points.length
-        if (length >= 1) {
-            let dist = pos.sub(this.route_points[length - 1]).mag()
-            if (dist <= MetroLine.min_draw_distance) { // 如果距离太小 则 不进行绘制
-                return
-            }
-        }
-        this.route_points.push(pos)
         this.end_pos = pos
         pos = this.node.convertToNodeSpaceAR(pos)
-        this.graphic.Draw(pos) // 更新视觉效果
+        this.graphic.Draw(pos, entity) // 更新视觉效果
     },
-    addStation(station) {
-        //if (this.hasStation(station)) return false; //TODO 考虑是否可以重复加入同一个 station
-        this.entities.push(station) // 可以重复加入同一个 站点
+    addStation(entity) {
+        if (this.entities.length != 0 && entity == this.entities[this.entities.length - 1]) { // 如果和上一个站位为同一站则不添加
+            return
+        }
+        this.entities.push(entity) // 可以重复加入同一个 站点
         return true;
     },
 
@@ -111,24 +121,29 @@ var MetroLine = cc.Class({
         let entities = arguments
             // 返回 对应的 缓动对象
         let dists = []
+        dists.length = entities.length
         let total_dist = 0
         let time = 0.5
         for (let i = 0; i < entities.length; i++) {
+            if (entities[i] == null) continue
             let entity_pos = entities[i].node.getPosition()
             let distance = this.car_pos.sub(entity_pos).mag()
             total_dist += distance
-            dists.push(distance)
+            dists[i] = distance
         }
         let pop = this.car.cur_pop
         let rest = pop
 
         let tweens = []
+        let last_idx = 0
         for (let i = 0; i < entities.length - 1; i++) {
+            if (entities[i] == null) continue
             let num = Math.floor((dists[i] / total_dist) * pop)
             rest -= num
             tweens.push(entities[i].crowdIn(num, time, this))
+            last_idx = i
         }
-        tweens.push(entities[entities.length - 1].crowdIn(rest, time, this))
+        tweens.push(entities[last_idx].crowdIn(rest, time, this))
 
         return tweens
     },
@@ -168,7 +183,7 @@ var MetroLine = cc.Class({
     },
     onState(state, dt) {
         switch (state) {
-            case States.Build:
+            case States.BUILD:
                 this.onBuild(dt)
                 break;
             case States.RUN:
@@ -185,36 +200,59 @@ var MetroLine = cc.Class({
     /// Run
     onRunEnter() {},
     onRun() {
-        if (this.graphic.isFaded()) { // 运输完毕
+        if (!this.graphic.hasRoute()) { // 运输完毕
             this._next_state = States.DONE
             return
         }
-        this.graphic.startFade(this.speed) // 持续调用 防止 speed 的中途变换
-        this.car.onRun(this.car_pos, this.graphic.getDir())
         let next_station = this.entities[0]
-        if (next_station == null) return;
-        if (next_station.isIn(this.car_pos)) { // 进入站点/ 出口 进行 处理
-            this.cur_wait_time = 0
-            if (this.entities.length == 1 && next_station.isIn(this.end_pos)) { // 是最后一个站点 并且 最终的结点在改站点上
-                return;
+        if (next_station != null && next_station.isIn(this.car_pos)) { // 进入站点/ 出口 进行 处理
+            if (this.entities.length == 1 && next_station.isIn(this.end_pos)) { // 是最后一个站点 并且 最终的结点在该站点上
+                return; // 直接顺势进入到 Done 状态
             }
             this._next_state = States.WAIT;
         }
+        this.graphic.onRun(this.speed) // 持续调用 防止 speed 的中途变换
+        this.car.onRun(this.car_pos, this.graphic.getDir())
     },
     onRunExit() {},
     onBuildEnter() {
 
     },
     onBuild(deltatime) {
-        let adj_entities = MetroLine.metro_mng.getAdjancents(this.car_pos)
-        
+        // 视觉效果     
+        let adj_entities = MetroLine.metro_mng.getAdjancents(this.end_pos)
+        if (adj_entities != null && adj_entities.length != null) {
+            for (let i = 0; i < adj_entities.length; i++) {
+                let adj = adj_entities[i]
+                if (adj == null) {
+                    this.cnet_lines[i].active = false
+                    continue
+                }
+                let dir = adj.node.getPosition().sub(this.end_pos)
+                let dist = dir.mag()
+                if (this.cnet_lines[i].active == false) {
+                    this.cnet_lines[i].active = true
+                    this.cnet_lines[i].getComponent(cc.Animation).play()
+                }
+                this.cnet_lines[i].setPosition(this.end_pos)
+                this.cnet_lines[i].height = dist
+                this.cnet_lines[i].angle = Math.raduis2Angle(cc.Vec2.UP.signAngle(dir))
+            }
+        } else {
+            this.cnet_lines.forEach(cnet_line => {
+                cnet_line.active = false
+            });
+        }
     },
     onBuildExit() {
+        this.graphic.onBuildExit(this.speed)
+        this.car_pos = this.entities[0].node.position
         this.car.ready(this.car_pos, this.graphic.getDir())
     },
     /// Wait
     onWaitEnter() {
-        this.graphic.stopFade()
+        this.passed_stations++;
+        this.graphic.onWaitEnter()
         let cur_entity = this.entities[0]
         cur_entity.wait(this).call(() => {
             this._next_state = States.RUN
@@ -231,12 +269,12 @@ var MetroLine = cc.Class({
     /// Done
     onDoneEnter() {
         let adj_entities = MetroLine.metro_mng.getAdjancents(this.car_pos)
-        if (adj_entities.length == null) { //终点在 某个实体内
-            var tweens = this._spreadPop(adj_entities)
-        } else if (adj_entities.length == 0) {
+        if (adj_entities == null) {
             //TODO 扣分
             this._lineFade()
             return
+        } else if (adj_entities.length == null) { //终点在 某个实体内
+            var tweens = this._spreadPop(adj_entities)
         } else {
             var tweens = this._spreadPop(...adj_entities)
         }
@@ -260,7 +298,7 @@ var MetroLine = cc.Class({
 
 
     // 站点交互
-    vanishStation(station) {
+    vanishStation(station) { // 站点消失回调
         //TODO vanish
         let idx = this.entities.indexOf(station)
         let step = 0 // 前进步长
@@ -279,6 +317,7 @@ var MetroLine = cc.Class({
             this.entities[i] = this.entities[i + step]
         }
         this.entities.length -= step;
+        this.passed_stations -= step;
     },
     updatePop(delta_pop) { // 要求使用指定的  delta_pop 来更新线路的当前人数，并且返回确实更新的人数
         return this.car.getOn(delta_pop)
@@ -290,8 +329,4 @@ var MetroLine = cc.Class({
         this.graphic.resetDrawing()
         MetroLine.metro_mng.fadeLine(this)
     }
-
-
-
-
 });

@@ -1,0 +1,642 @@
+[{
+    "city": "无锡",
+    "city_id": 3202,
+    "line_sta": [{
+            "line_id": "1",
+            "line_name": "一号线",
+            "line_modify_status": "1",
+            "station": [{
+                    "station_id": "1363613991735291",
+                    "station_name": "堰桥",
+                    "station_no": "101",
+                    "station_phone": "",
+                    "station_modify_status": "1"
+                },
+                {
+                    "station_id": "1363613991735292",
+                    "station_name": "锡北运河",
+                    "station_no": "102",
+                    "station_phone": "",
+                    "station_modify_status": "1"
+                },
+                {
+                    "station_id": "1363613991735293",
+                    "station_name": "西漳",
+                    "station_no": "103",
+                    "station_phone": "",
+                    "station_modify_status": "1"
+                },
+                {
+                    "station_id": "1363613991735294",
+                    "station_name": "天一",
+                    "station_no": "104",
+                    "station_phone": "",
+                    "station_modify_status": "1"
+                },
+                {
+                    "station_id": "1363613991735300",
+                    "station_name": "刘潭",
+                    "station_no": "105",
+                    "station_phone": "",
+                    "station_modify_status": "1"
+                },
+                {
+                    "station_id": "1363613991735301",
+                    "station_name": "庄前",
+                    "station_no": "106",
+                    "station_phone": "",
+                    "station_modify_status": "1"
+                },
+                {
+                    "station_id": "1363613991735302",
+                    "station_name": "民丰",
+                    "station_no": "107",
+                    "station_phone": "",
+                    "station_modify_status": "1"
+                },
+                {
+                    "station_id": "1363613991735303",
+                    "station_name": "无锡火车站",
+                    "station_no": "108",
+                    "station_phone": "",
+                    "station_modify_status": "1"
+                },
+                {
+                    "station_id": "1363613991735304",
+                    "station_name": "胜利门",
+                    "station_no": "109",
+                    "station_phone": "",
+                    "station_modify_status": "1"
+                },
+                {
+                    "station_id": "1363613991735305",
+                    "station_name": "三阳广场",
+                    "station_no": "110",
+                    "station_phone": "",
+                    "station_modify_status": "1"
+                },
+                {
+                    "station_id": "1363613991735306",
+                    "station_name": "南禅寺",
+                    "station_no": "111",
+                    "station_phone": "",
+                    "station_modify_status": "1"
+                },
+                {
+                    "station_id": "1363613991735307",
+                    "station_name": "谈渡桥",
+                    "station_no": "112",
+                    "station_phone": "",
+                    "station_modify_status": "1"
+                },
+                {
+                    "station_id": "1363613991735308",
+                    "station_name": "太湖广场",
+                    "station_no": "113",
+                    "station_phone": "",
+                    "station_modify_status": "1"
+                },
+                {
+                    "station_id": "1363613991735309",
+                    "station_name": "清名桥",
+                    "station_no": "114",
+                    "station_phone": "",
+                    "station_modify_status": "1"
+                },
+                {
+                    "station_id": "1363613991735310",
+                    "station_name": "人民医院",
+                    "station_no": "115",
+                    "station_phone": "",
+                    "station_modify_status": "1"
+                },
+                {
+                    "station_id": "1363613991735311",
+                    "station_name": "华清大桥",
+                    "station_no": "116",
+                    "station_phone": "",
+                    "station_modify_status": "1"
+                },
+                {
+                    "station_id": "1363613991735312",
+                    "station_name": "扬名",
+                    "station_no": "117",
+                    "station_phone": "",
+                    "station_modify_status": "1"
+                },
+                {
+                    "station_id": "1363613991735313",
+                    "station_name": "南湖家园",
+                    "station_no": "118",
+                    "station_phone": "",
+                    "station_modify_status": "1"
+                },
+                {
+                    "station_id": "1363613991735314",
+                    "station_name": "塘铁桥",
+                    "station_no": "119",
+                    "station_phone": "",
+                    "station_modify_status": "1"
+                },
+                {
+                    "station_id": "1363613991735315",
+                    "station_name": "金匮公园",
+                    "station_no": "120",
+                    "station_phone": "",
+                    "station_modify_status": "1"
+                },
+                {
+                    "station_id": "1363613991735316",
+                    "station_name": "市民中心",
+                    "station_no": "121",
+                    "station_phone": "",
+                    "station_modify_status": "1"
+                },
+                {
+                    "station_id": "1363613991735317",
+                    "station_name": "文化宫",
+                    "station_no": "122",
+                    "station_phone": "",
+                    "station_modify_status": "1"
+                },
+                {
+                    "station_id": "1363613991735318",
+                    "station_name": "江南大学",
+                    "station_no": "123",
+                    "station_phone": "",
+                    "station_modify_status": "1"
+                },
+                {
+                    "station_id": "1363613991735319",
+                    "station_name": "长广溪",
+                    "station_no": "124",
+                    "station_phone": "",
+                    "station_modify_status": "1"
+                }
+            ]
+        },
+        {
+            "line_id": "2",
+            "line_name": "二号线",
+            "line_modify_status": "1",
+            "station": [{
+                    "station_id": "1363613991735320",
+                    "station_name": "梅园开原寺",
+                    "station_no": "201",
+                    "station_phone": "",
+                    "station_modify_status": "1"
+                },
+                {
+                    "station_id": "1363613991735321",
+                    "station_name": "荣巷",
+                    "station_no": "202",
+                    "station_phone": "",
+                    "station_modify_status": "1"
+                },
+                {
+                    "station_id": "1363613991735322",
+                    "station_name": "小桃源",
+                    "station_no": "203",
+                    "station_phone": "",
+                    "station_modify_status": "1"
+                },
+                {
+                    "station_id": "1363613991735323",
+                    "station_name": "河埒口",
+                    "station_no": "204",
+                    "station_phone": "",
+                    "station_modify_status": "1"
+                },
+                {
+                    "station_id": "1363613991735324",
+                    "station_name": "大王基",
+                    "station_no": "205",
+                    "station_phone": "",
+                    "station_modify_status": "1"
+                },
+                {
+                    "station_id": "1363613991735325",
+                    "station_name": "梁溪大桥",
+                    "station_no": "206",
+                    "station_phone": "",
+                    "station_modify_status": "1"
+                },
+                {
+                    "station_id": "1363613991735326",
+                    "station_name": "五爱广场",
+                    "station_no": "207",
+                    "station_phone": "",
+                    "station_modify_status": "1"
+                },
+                {
+                    "station_id": "1363613991735305",
+                    "station_name": "三阳广场",
+                    "station_no": "208",
+                    "station_phone": "",
+                    "station_modify_status": "1"
+                },
+                {
+                    "station_id": "1363613991735327",
+                    "station_name": "东林广场",
+                    "station_no": "209",
+                    "station_phone": "",
+                    "station_modify_status": "1"
+                },
+                {
+                    "station_id": "1363613991735328",
+                    "station_name": "上马墩",
+                    "station_no": "210",
+                    "station_phone": "",
+                    "station_modify_status": "1"
+                },
+                {
+                    "station_id": "1363613991735329",
+                    "station_name": "靖海",
+                    "station_no": "211",
+                    "station_phone": "",
+                    "station_modify_status": "1"
+                },
+                {
+                    "station_id": "1363613991735330",
+                    "station_name": "广益",
+                    "station_no": "212",
+                    "station_phone": "",
+                    "station_modify_status": "1"
+                },
+                {
+                    "station_id": "1363613991735331",
+                    "station_name": "柏庄",
+                    "station_no": "213",
+                    "station_phone": "",
+                    "station_modify_status": "1"
+                },
+                {
+                    "station_id": "1363613991735332",
+                    "station_name": "东亭",
+                    "station_no": "214",
+                    "station_phone": "",
+                    "station_modify_status": "1"
+                },
+                {
+                    "station_id": "1363613991735333",
+                    "station_name": "庄桥",
+                    "station_no": "215",
+                    "station_phone": "",
+                    "station_modify_status": "1"
+                },
+                {
+                    "station_id": "1363613991735334",
+                    "station_name": "云林",
+                    "station_no": "216",
+                    "station_phone": "",
+                    "station_modify_status": "1"
+                },
+                {
+                    "station_id": "1363613991735335",
+                    "station_name": "九里河公园",
+                    "station_no": "217",
+                    "station_phone": "",
+                    "station_modify_status": "1"
+                },
+                {
+                    "station_id": "1363613991735336",
+                    "station_name": "查桥",
+                    "station_no": "218",
+                    "station_phone": "",
+                    "station_modify_status": "1"
+                },
+                {
+                    "station_id": "1363613991735337",
+                    "station_name": "映月湖公园",
+                    "station_no": "219",
+                    "station_phone": "",
+                    "station_modify_status": "1"
+                },
+                {
+                    "station_id": "1363613991735338",
+                    "station_name": "迎宾广场",
+                    "station_no": "220",
+                    "station_phone": "",
+                    "station_modify_status": "1"
+                },
+                {
+                    "station_id": "1363613991735339",
+                    "station_name": "无锡东站",
+                    "station_no": "221",
+                    "station_phone": "",
+                    "station_modify_status": "1"
+                },
+                {
+                    "station_id": "1363613991735340",
+                    "station_name": "安镇",
+                    "station_no": "222",
+                    "station_phone": "",
+                    "station_modify_status": "1"
+                }
+            ]
+        }
+    ]
+}, {
+    "city": "北京",
+    "city_id": 3,
+    "line_sta": [{
+            "line_id": "1",
+            "line_name": "一号线",
+            "line_modify_status": "1",
+            "station": [{
+                    "station_id": "291",
+                    "station_name": "苹果园站",
+                    "station_no": "101",
+                    "station_phone": "",
+                    "station_modify_status": "1"
+                },
+                {
+                    "station_id": "292",
+                    "station_name": "古城站",
+                    "station_no": "102",
+                    "station_phone": "",
+                    "station_modify_status": "1"
+                },
+                {
+                    "station_id": "293",
+                    "station_name": "八角游乐园站",
+                    "station_no": "103",
+                    "station_phone": "",
+                    "station_modify_status": "1"
+                },
+                {
+                    "station_id": "294",
+                    "station_name": "八宝山站",
+                    "station_no": "104",
+                    "station_phone": "",
+                    "station_modify_status": "1"
+                },
+                {
+                    "station_id": "300",
+                    "station_name": "玉泉路站",
+                    "station_no": "105",
+                    "station_phone": "",
+                    "station_modify_status": "1"
+                },
+                {
+                    "station_id": "301",
+                    "station_name": "五棵松站",
+                    "station_no": "106",
+                    "station_phone": "",
+                    "station_modify_status": "1"
+                },
+                {
+                    "station_id": "302",
+                    "station_name": "万寿路站",
+                    "station_no": "107",
+                    "station_phone": "",
+                    "station_modify_status": "1"
+                },
+                {
+                    "station_id": "303",
+                    "station_name": "公主坟站",
+                    "station_no": "108",
+                    "station_phone": "",
+                    "station_modify_status": "1"
+                },
+                {
+                    "station_id": "304",
+                    "station_name": "军事博物馆站",
+                    "station_no": "109",
+                    "station_phone": "",
+                    "station_modify_status": "1"
+                },
+                {
+                    "station_id": "305",
+                    "station_name": "木樨地站",
+                    "station_no": "110",
+                    "station_phone": "",
+                    "station_modify_status": "1"
+                },
+                {
+                    "station_id": "306",
+                    "station_name": "南礼士路站",
+                    "station_no": "111",
+                    "station_phone": "",
+                    "station_modify_status": "1"
+                },
+                {
+                    "station_id": "307",
+                    "station_name": "复兴门站",
+                    "station_no": "112",
+                    "station_phone": "",
+                    "station_modify_status": "1"
+                },
+                {
+                    "station_id": "308",
+                    "station_name": "西单站",
+                    "station_no": "113",
+                    "station_phone": "",
+                    "station_modify_status": "1"
+                },
+                {
+                    "station_id": "309",
+                    "station_name": "天安门西站",
+                    "station_no": "114",
+                    "station_phone": "",
+                    "station_modify_status": "1"
+                },
+                {
+                    "station_id": "310",
+                    "station_name": "天安门东站",
+                    "station_no": "115",
+                    "station_phone": "",
+                    "station_modify_status": "1"
+                },
+                {
+                    "station_id": "311",
+                    "station_name": "王府井站",
+                    "station_no": "116",
+                    "station_phone": "",
+                    "station_modify_status": "1"
+                },
+                {
+                    "station_id": "312",
+                    "station_name": "东单站",
+                    "station_no": "117",
+                    "station_phone": "",
+                    "station_modify_status": "1"
+                },
+                {
+                    "station_id": "313",
+                    "station_name": "建国门站",
+                    "station_no": "118",
+                    "station_phone": "",
+                    "station_modify_status": "1"
+                },
+                {
+                    "station_id": "314",
+                    "station_name": "永安里站",
+                    "station_no": "119",
+                    "station_phone": "",
+                    "station_modify_status": "1"
+                },
+                {
+                    "station_id": "315",
+                    "station_name": "国贸站",
+                    "station_no": "120",
+                    "station_phone": "",
+                    "station_modify_status": "1"
+                },
+                {
+                    "station_id": "316",
+                    "station_name": "大望路站",
+                    "station_no": "121",
+                    "station_phone": "",
+                    "station_modify_status": "1"
+                },
+                {
+                    "station_id": "317",
+                    "station_name": "四惠站",
+                    "station_no": "122",
+                    "station_phone": "",
+                    "station_modify_status": "1"
+                },
+                {
+                    "station_id": "318",
+                    "station_name": "四惠东站",
+                    "station_no": "123",
+                    "station_phone": "",
+                    "station_modify_status": "1"
+                }
+            ]
+        },
+        {
+            "line_id": "2",
+            "line_name": "二号线",
+            "line_modify_status": "1",
+            "station": [{
+                    "station_id": "320",
+                    "station_name": "西直门站",
+                    "station_no": "201",
+                    "station_phone": "",
+                    "station_modify_status": "1"
+                },
+                {
+                    "station_id": "321",
+                    "station_name": "积水潭站",
+                    "station_no": "202",
+                    "station_phone": "",
+                    "station_modify_status": "1"
+                },
+                {
+                    "station_id": "322",
+                    "station_name": "鼓楼大街站",
+                    "station_no": "203",
+                    "station_phone": "",
+                    "station_modify_status": "1"
+                },
+                {
+                    "station_id": "323",
+                    "station_name": "安定门站",
+                    "station_no": "204",
+                    "station_phone": "",
+                    "station_modify_status": "1"
+                },
+                {
+                    "station_id": "324",
+                    "station_name": "雍和宫站",
+                    "station_no": "205",
+                    "station_phone": "",
+                    "station_modify_status": "1"
+                },
+                {
+                    "station_id": "325",
+                    "station_name": "东直门站",
+                    "station_no": "206",
+                    "station_phone": "",
+                    "station_modify_status": "1"
+                },
+                {
+                    "station_id": "326",
+                    "station_name": "东四十条站",
+                    "station_no": "207",
+                    "station_phone": "",
+                    "station_modify_status": "1"
+                },
+                {
+                    "station_id": "327",
+                    "station_name": "朝阳门站",
+                    "station_no": "209",
+                    "station_phone": "",
+                    "station_modify_status": "1"
+                },
+                {
+                    "station_id": "313",
+                    "station_name": "建国门站",
+                    "station_no": "210",
+                    "station_phone": "",
+                    "station_modify_status": "1"
+                },
+                {
+                    "station_id": "329",
+                    "station_name": "北京站",
+                    "station_no": "211",
+                    "station_phone": "",
+                    "station_modify_status": "1"
+                },
+                {
+                    "station_id": "330",
+                    "station_name": "崇文门站",
+                    "station_no": "212",
+                    "station_phone": "",
+                    "station_modify_status": "1"
+                },
+                {
+                    "station_id": "331",
+                    "station_name": "前门站",
+                    "station_no": "213",
+                    "station_phone": "",
+                    "station_modify_status": "1"
+                },
+                {
+                    "station_id": "332",
+                    "station_name": "和平门站",
+                    "station_no": "214",
+                    "station_phone": "",
+                    "station_modify_status": "1"
+                },
+                {
+                    "station_id": "333",
+                    "station_name": "宣武门站",
+                    "station_no": "215",
+                    "station_phone": "",
+                    "station_modify_status": "1"
+                },
+                {
+                    "station_id": "334",
+                    "station_name": "长椿街站",
+                    "station_no": "216",
+                    "station_phone": "",
+                    "station_modify_status": "1"
+                },
+                {
+                    "station_id": "335",
+                    "station_name": "复兴门站",
+                    "station_no": "217",
+                    "station_phone": "",
+                    "station_modify_status": "1"
+                },
+                {
+                    "station_id": "336",
+                    "station_name": "阜成门站",
+                    "station_no": "218",
+                    "station_phone": "",
+                    "station_modify_status": "1"
+                },
+                {
+                    "station_id": "337",
+                    "station_name": "车公庄站",
+                    "station_no": "219",
+                    "station_phone": "",
+                    "station_modify_status": "1"
+                }
+            ]
+        }
+    ]
+}]

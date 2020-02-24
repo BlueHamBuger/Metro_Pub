@@ -62,17 +62,15 @@ var MetroCar = cc.Class({
             let new_body = cc.instantiate(this.car_body)
             this.car_bodies[i] = new_body
             new_body.setParent(this.node)
-            new_body.setPosition(this.car_bodies[i - 1].getPosition().add(cc.v2(0, this.body_diff * i)))
+            console.log(this.car_bodies[i - 1].position);
+            new_body.setPosition(this.car_bodies[i - 1].position.sub(cc.v2(0, this.body_diff)))
         }
+        this.node.active = false
     },
     update(dt) {
         this.upadteEffects()
     },
     ready(pos, dir) {
-        for (let i = 0; i < this.car_bodies.length; i++) {
-            //this.car_bodies[i].setPosition(this.default_pos[i])
-            this.car_bodies[i].angle = 0
-        }
         this.node.setPosition(pos)
         this.node.angle = cc.Vec2.UP.signAngle(dir) * 180 / Math.PI;
         this.node.active = true
@@ -83,11 +81,11 @@ var MetroCar = cc.Class({
         let new_pos = for_pos.lerp(this.node.convertToNodeSpaceAR(pos), 0.25)
         this.car_head.setPosition(new_pos);
         let angle = cc.Vec2.UP.signAngle(dir) * 180 / Math.PI;
-        let new_angle = cc.misc.slerp(this.car_head.angle, angle - this.node.angle, 0.1)
+        let new_angle = cc.misc.slerp(this.car_head.angle, angle - this.node.angle, 0.3)
         this.car_head.angle = new_angle
         for (let i = 0; i < this.car_bodies.length; i++) {
             let body = this.car_bodies[i]
-            new_pos = body.position.lerp(new_pos.sub(cc.Vec2.UP.rotate(new_angle * Math.PI / 180).mul(500)), 0.7)
+            new_pos = body.position.lerp(new_pos.sub(cc.Vec2.UP.rotate(new_angle * Math.PI / 180).mul(this.body_diff)), 0.7)
             body.setPosition(new_pos)
             new_angle = cc.misc.slerp(body.angle, new_angle, 0.25)
             if (new_angle == null) {
@@ -98,12 +96,13 @@ var MetroCar = cc.Class({
         }
     },
     onRunExit() {
-        let for_pos = this.car_head.position
         this.car_head.setPosition(0, 0)
         this.car_head.angle = 0
         this.cur_pop = 0
+        let for_pos = this.car_head.position
         for (let i = 0; i < this.car_bodies.length; i++) {
-            this.car_bodies[i].setPosition(this.car_bodies[i].position.sub(for_pos))
+            this.car_bodies[i].setPosition(for_pos.sub(cc.Vec2.UP.mul(this.body_diff)))
+            for_pos = this.car_bodies[i].position
             this.car_bodies[i].angle = 0
         }
         this.node.active = false
@@ -132,5 +131,4 @@ var MetroCar = cc.Class({
     isEmpty() {
         return this.cur_pop == 0
     }
-
 });

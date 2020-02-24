@@ -45,9 +45,10 @@ var GameManager = cc.Class({
 
         this.dataMng = this.initMng("DataManager", this);
         this.dataMng.initManager(this)
+        this.startGame()
 
-        this.metroMng = this.initMng("MetroManager", this.metro);
-        this.metroMng.initManager(this);
+        // this.metroMng = this.initMng("MetroManager", this.metro);
+        // this.metroMng.initManager(this);
         // this.animMng = this.initMng("AnimationManager", this.node);
         // this.uiMng.initManager(this);
     },
@@ -59,9 +60,19 @@ var GameManager = cc.Class({
     },
     //游戏状态相关
     startGame() {
-        this.score = 0;
-        this.inputMng.initManager(this);
-        this.animMng.initManager(this);
+        // this.score = 0;
+        // this.inputMng.initManager(this);
+        // this.animMng.initManager(this);
+        this.dataMng.onGameStart((err) => {
+            if (err == null) { // 加载成功
+                this.metroMng = this.initMng("MetroManager", this.metro);
+                this.metroMng.initManager(this);
+                this.metroMng.station_datas = this.dataMng.station_datas
+                this.metroMng.onGameStart()
+            } else {
+                throw "站点数据加载失败"
+            }
+        })
     },
     exitGame() {
         if (this.animMng)
@@ -101,8 +112,8 @@ var GameManager = cc.Class({
         copyAttr(require("MetroLine"), settings.line)
         copyAttr(require("MetroCar"), settings.car)
     },
-    loadData(entity) { // TODO 任何数据的获取 都需要加载完毕后才继续
-        return this.dataMng.loadData(entity)
+    loadData(type, param) { // TODO 任何数据的获取 都需要加载完毕后才继续
+        return this.dataMng.loadData(type, param)
     }
 
 

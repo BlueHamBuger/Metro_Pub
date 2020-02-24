@@ -5,10 +5,18 @@
     "metro": {
         "station_pool_size": 20,
         "line_pool_size": 5,
-        "exit_pool_size": 5
+        "exit_pool_size": 5,
+        "hard_settings": {
+            "hard_one": {
+                "threashold": 10000
+            },
+            "hard_two": {
+                "threashold": 50000
+            }
+        }
     },
     "line": {
-        "min_draw_distance": 20
+        "min_draw_distance": 4
     },
     "car": {
         "car_props": [{

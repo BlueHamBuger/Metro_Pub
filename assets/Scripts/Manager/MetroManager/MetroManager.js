@@ -1,58 +1,8 @@
 //总管 所有的 地铁站 包括其生成，布局 等等
 // 需要保持有 一个 node pool
-
-const stations = [{
-    city: "无锡",
-    lines: [{
-            line_id: 0,
-            line_name: "一号线",
-            line_sta: [
-                "堰桥",
-                "锡北运河",
-                "西漳",
-                "天一",
-                "刘潭",
-                "庄前",
-                "民丰",
-                "无锡火车站",
-            ]
-        },
-        {
-            line_id: 1,
-            line_name: "二号线",
-            line_sta: [
-                "胜利门",
-                "三阳广场",
-                "南禅寺",
-                "谈渡桥",
-                "太湖广场",
-                "清名桥",
-                "人民医院",
-                "华清大桥",
-                "扬名",
-            ]
-        },
-        {
-            line_id: 2,
-            line_name: "三号线",
-            line_sta: [
-                "南湖家园",
-                "塘铁桥",
-                "金匮公园",
-                "市民中心",
-                "文化宫",
-                "江南大学",
-                "长广溪",
-                "梅园开原寺",
-                "荣巷",
-                "小桃源",
-            ]
-        },
-    ]
-}]
-
 var MetroLine = require("MetroLine")
 var MetroStation = require("MetroStation")
+var LevelController = require("LevelController")
 var Metro = cc.Class({
     extends: require("BaseManager"),
     properties: {
@@ -75,39 +25,54 @@ var Metro = cc.Class({
         exit_prefab: {
             default: null,
             type: cc.Prefab,
+        },
+        hardThreashold: { // 难度变化的  阈值
+            default: [],
+            type: [cc.Integer]
+        },
+        score: {
+            get() {
+                return this._score
+            },
+            set(value) {
+                this._score = value
+            }
         }
     },
     ctor() {
         this.cur_line = null // 当前正在构建的 路线
         this.former_entity = null // 之前touch 的 station
+        this._score = 0
+        this.metroUpdate = this.hardOne // 游戏的更新逻辑 和 难度相关
+        this._occupied_cells = [] // 被占用的 cells 
+        this._exits = [] // 出口数量
+        this.station_datas = null //站点数据
     },
-    start() {
+    onGameStart() {
         this.station_root = this.node.getChildByName("Stations")
         this.line_root = this.node.getChildByName("Lines")
         MetroLine.metro_mng = this;
         MetroStation.metro_mng = this; // 设置 管理员
         Metro.station_size = this.station_prefab.data.getContentSize().width; // 初始化 station 的 size
-
-
     },
-
-    // LIFE-CYCLE CALLBACKS:
-
-    //onLoad () {},
-
+    update(dt) {
+        if (this.station_root != null) { // 游戏未开始
+            this.levelController.update(dt)
+        }
+    },
     initManager(gameMng) {
         this._super(gameMng)
-
-        // 对象池初始化
+            // 对象池初始化
         this._initPools();
         // 布局初始化
         this._initCells();
         // 事件监听
         this._initEvents();
-        // 初始化出口
 
+        //关卡控制器设置
+        this.levelController = new LevelController(this)
 
-        //TEST 绘制 grid
+        //TEST 绘制 grid 以及 测试站点
         let graphic = this.node.getComponent(cc.Graphics);
         for (let i = 0; i < this.layouty; i++) {
             graphic.moveTo(0, i * this.cellheight)
@@ -119,12 +84,8 @@ var Metro = cc.Class({
         }
         graphic.stroke();
 
-        for (let i = 0; i < 10; i++)
-            this.randomGenStation();
-
-        let cellindex = this._randomGetFreeCell()
-        this.genExit(cellindex[0], cellindex[1])
-
+        // for (let i = 0; i < 10; i++)
+        //     this.randomGenStation();
     },
     //事件 及 回调函数
     _initEvents() {
@@ -153,32 +114,41 @@ var Metro = cc.Class({
         this.onTouchEntity(entity, line, pos)
     },
     onTouchEnd(event) {
-        ///this.cur_line //TODO something
+        var pos = event.getLocation();
+        var cellindex = this.getCellIndex(pos);
+        if (cellindex == null) throw "Line 输入不在范围内"
+        let entity = this.cells[cellindex[0]][cellindex[1]].entity
+        if (entity != null && entity.isIn(pos)) {
+            entity.onTouchEnd()
+            this.former_entity = null
+        }
         this.cur_line.buildOver();
         this.cur_line = null
     },
     onTouchEntity(entity, line, pos) { // 分别通知 line  和 station 当前触碰到了一个 station
-        let entity_touchend = true
-        let former_entity = this.former_entity
+        var entity_changed = true
+        var entity_touched = false
+        var former_entity = this.former_entity
         this.former_entity = null
         if (entity != null) {
             if (entity.isIn(pos)) {
+                entity_touched = true
                 if (entity != former_entity) { // 不是同一个 加入到  站点中
                     entity.onTouch();
-                    if (line.addStation(entity)) { // 被成功添加了（该line 中不存在该站点）
+                    if (line.addStation(entity)) { // 被成功添加了（如果有特殊条件）
                         entity.onAdded(line) // 触发station 的  onAdded函数 告知其被加入了
                     }
                 } else {
-                    entity_touchend = false
+                    entity_changed = false
                 }
                 this.former_entity = entity
 
             } //TODO not in pos else
         }
-        if (entity_touchend && former_entity != null) {
+        if (entity_changed && former_entity != null) {
             former_entity.onTouchEnd()
         }
-        line.build(pos);
+        line.build(pos, entity_touched ? entity : null);
     },
     // onTouchCancle(event) {
 
@@ -194,6 +164,7 @@ var Metro = cc.Class({
 
         for (let i = 0; i < Metro.station_pool_size; i++) {
             var station = cc.instantiate(this.station_prefab);
+            station.getComponent("MetroStation").init()
             this.station_pool.put(station);
         }
 
@@ -204,6 +175,7 @@ var Metro = cc.Class({
 
         for (let i = 0; i < Metro.exit_pool_size; i++) {
             let exit = cc.instantiate(this.exit_prefab)
+            exit.getComponent("MetroExit").init()
             this.exit_pool.put(exit)
         }
     },
@@ -273,6 +245,9 @@ var Metro = cc.Class({
         }
         return [cellx, celly] //  返回一个
     },
+    _randGetFreeCellByPtn(pattern, pattern_info) {
+
+    },
     isFree(x, y) {
         return this.cells[x][y].entity == null;
     },
@@ -282,17 +257,20 @@ var Metro = cc.Class({
         if (entity != null && entity.isIn(pos)) { // 如果终点在 某个实体内 则直接将全部的乘客送到该站内即可
             return entity
         }
-        let entities = []
+        let entities = [];
+        entities.length = 9
+        let not_null = false
         for (let i = -1; i <= 1; i++) { // 检查周边的九宫格  
             let x = cellindex[0] + i
             for (let j = -1; j <= 1; j++) {
                 let y = cellindex[1] + j
                 if (this._isValid(x, y) && !this.isFree(x, y)) {
-                    entities.push(this.cells[x][y].entity)
+                    entities[(i + 1) * 3 + j + 1] = this.cells[x][y].entity
+                    not_null = true
                 }
             }
         }
-        return entities
+        return not_null ? entities : null
     },
     _isValid(cellindex_or_x, y) { // 检查
         if (y != null) {
@@ -303,55 +281,99 @@ var Metro = cc.Class({
         }
         return ((x >= 0 && x < this.cells[0].length) && (y < this.cells.length && y >= 0))
     },
+    getOccupiedCells() {
+        return this._occupied_cells
+    },
+    getExitCells() {
+        return this._exits
+    },
 
 
     // Entity 生成
-    randomGenStation() { // 随机生成一个 站点 并将其 放入到 cells 数组进行监视        
+    randomGenStation(station_info) { // 随机生成一个 站点 并将其 放入到 cells 数组进行监视        
         let cellindex = this._randomGetFreeCell()
         if (cellindex == null) throw "没有空余空间"; //生成失败
-        this.genStation(cellindex[0], cellindex[1])
+        this.genStation(cellindex[0], cellindex[1], station_info)
     },
-    genStation(x, y) { // 生成站点
+    randomGenExit() {
+        let cellindex = this._randomGetFreeCell()
+        return this.genExit(cellindex[0], cellindex[1])
+    },
+    randGenStatOfPattern(station_infos, pattern, pattern_info) {
+        let cells = this.cells
+        let mask = null
+        let randomRange = [] // 随机区域的取值范围，
+        for (let i = 0; i < this.layouty; i++) {
+            randomRange.push(i)
+        }
+        while (true) { // 随机生成
+            if (randomRange.length == 0) return false
+            let i = randomRange[Math.floor(Math.random() * randomRange.length)]
+            randomRange.remove(i)
+            let start_j = Math.floor(Math.random() * this.layoutx)
+            let j = start_j
+            do {
+                mask = pattern(pattern_info, i, j)
+                    // 如果为空 则说明位置不合法
+                if (mask != null && this._checkPattern(mask)) { // 可行
+                    this.genStationByPattern(mask, station_infos)
+                    return true // 成功
+                }
+                j = j == this.layoutx - 1 ? 0 : j + 1
+            } while (j != start_j);
+        }
+    },
+    genStationByPattern(pattern_mask, station_infos) { //不可不检查 mask 直接调用
+        let cur_num = 0
+        for (let i = 0; i < this.cell_masks.col_mask.length; i++) {
+            let cur_x = 0
+            while ((cur_x = Math.getMaxBit(pattern_mask[i])) != -1) {
+                pattern_mask[i] -= 1 << cur_x
+                this.genStation(cur_x, i, station_infos[cur_num++])
+            }
+        }
+    },
+    _checkPattern(pattern_mask) { // 检查 对应的 pattern 在指定位置是否可用
+        var sum = 0
+        let tar_sum = 0
+        for (let i = 0; i < this.cell_masks.col_mask.length; i++) {
+            let and_result = this.cell_masks.col_mask[i] & pattern_mask[i]
+            sum += and_result
+            tar_sum += pattern_mask[i]
+        }
+        if (tar_sum != sum) { // 不等，说明重合部位有被占用的cell
+            return false
+        }
+        return true
+    },
+
+    genStation(x, y, station_info) { // 生成站点
         if (this.isFree(x, y) == false) throw "已有站点"
             //TODO 解决超过池上限
-
         if (this.station_pool.size == 0) throw "对象池没有空余"; // 没有空位
-
-
         let stationRadius = Metro.station_size;
         let maxRadius = Math.min(this.cellheight, this.cellwidth);
         let scale = (0.5 + Math.random() * 0.5) * maxRadius / stationRadius;
         let scaledRadius = stationRadius * scale;
         let xrange = (this.cellwidth - scaledRadius) / 2;
         let yrange = (this.cellheight - scaledRadius) / 2;
-        var station = this.station_pool.get(100, 1 + Math.random() * 4, '北京站', cc.Color.BLUE, [x, y], scale);
+        var station = this.station_pool.get(100, station_info, [x, y], scale);
         let cell = this.cells[x][y]
-        cell.entity = station.getComponent("MetroStation");
         station.setScale(scale, scale)
         station.setPosition(cell.x + (xrange * (1 - 2 * Math.random())), cell.y + (yrange * (1 - 2 * Math.random())));
         station.setParent(this.station_root);
-
-        //this.cell_masks.row_mask &= ~(1 << y)
-        this.cell_masks.col_mask[y] &= ~(1 << x)
-        if (this.cell_masks.col_mask[y] & this.col_able_mask == 0) {
-            this.cell_masks.row_mask &= ~(1 << y)
-        }
+        this.occupyCell(x, y, station)
     },
-    vanishStation(station) {
+    vanishStation(station, is_exit) {
         this.station_pool.put(station.node)
         station.node.targetOff(this)
         let x = station.cellindex[0]
         let y = station.cellindex[1]
-        if (this.cell_masks.col_mask[y] & this.col_able_mask == 0) {
-            this.cell_masks.row_mask |= (1 << y)
-        }
-        this.cell_masks.col_mask[y] |= (1 << x)
-        this.cells[x][y].entity = null
+        this.releaseCell(x, y, is_exit)
     },
     genExit(x, y) { //生成出口站
         if (this.isFree(x, y) == false) throw "已有实体"
             //TODO 解决超过池上限
-
         if (this.exit_pool.size == 0) throw "出口对象池没有空余"; // 没有空位
         let stationRadius = Metro.station_size;
         let maxRadius = Math.min(this.cellheight, this.cellwidth);
@@ -361,23 +383,57 @@ var Metro = cc.Class({
         let yrange = (this.cellheight - scaledRadius) / 2;
 
         var exit = this.exit_pool.get([x, y], scale);
-
         let cell = this.cells[x][y]
-        cell.entity = exit.getComponent("MetroExit");
         exit.setScale(scale, scale)
         exit.setPosition(cell.x + (xrange * (1 - 2 * Math.random())), cell.y + (yrange * (1 - 2 * Math.random())));
         exit.setParent(this.station_root);
-
-        //this.cell_masks.row_mask &= ~(1 << y)
+        this.occupyCell(x, y, exit, true)
+    },
+    occupyCell(x, y, entity, is_exit = false) {
         this.cell_masks.col_mask[y] &= ~(1 << x)
         if (this.cell_masks.col_mask[y] & this.col_able_mask == 0) {
             this.cell_masks.row_mask &= ~(1 << y)
         }
+        let cell = this.cells[x][y]
+        if (!is_exit)
+            this._occupied_cells.push(cell)
+        else
+            this._exits.push(cell)
 
+        cell.entity = entity.getComponent("MetroEntity");
+    },
+    releaseCell(x, y, is_exit = false) {
+        if (this.cell_masks.col_mask[y] & this.col_able_mask == 0) {
+            this.cell_masks.row_mask |= (1 << y)
+        }
+        this.cell_masks.col_mask[y] |= (1 << x)
+        let cell = this.cells[x][y]
+
+        if (!is_exit)
+            this._occupied_cells.splice(this._occupied_cells.indexOf(cell), 1)
+        else
+            this._exits.splice(this._occupied_cells.indexOf(cell), 1)
+        cell.entity = null
+    },
+    isStationExist(station_data) { //检查对应的站点 是否已经被生成
+        let id = station_data.station_id
+        for (let i = 0; i < this._occupied_cells.length; i++) {
+            if (this._occupied_cells[i].station_id == id)
+                return this._occupied_cells[i]
+        }
+        return null
     },
 
+    //entity 交互
+    addScore(score) { // 分数的增加
+        this.score += score
+        if (this.score < this.hardThreashold[0]) {
+            this.metroUpdate = this.hardOne
+        } else if (this.score < this.hardThreashold[1]) {
+            this.metroUpdate = this.hardTwo
+        }
 
-
+    },
     //Line 生成
     genLine() {
         var line = this.line_pool.get(1, 100);
@@ -395,7 +451,10 @@ var Metro = cc.Class({
 
     // 上层接口封装
     getCarInstance() {
-        return this.gameMng.loadData(this.gameMng.playerMng.car_selected)
-    }
-
+        return this.gameMng.loadData(window.GB_DataType.CAR_PREFAB, this.gameMng.playerMng.car_selected)
+    },
+    getEffect(id, idx) {
+        return this.gameMng.dataMng.getEffect(id, idx)
+    },
+    // 私有幫助函數
 })
