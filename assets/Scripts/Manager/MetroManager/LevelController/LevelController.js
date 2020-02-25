@@ -85,44 +85,42 @@ var LevelController = cc.Class({ //
             this._canGen = false
             let generate_num = Math.getRandom(setting.num_std, setting.num_var, true)
                 // 生成连续的特定 样式的站点
-            let city = this._randomGetCity()
-            let line = this._randomGetLine(city)
-            let length = line.station.length
-            let start_idx = Math.floor(random() * length)
-            if (start_idx + generate_num >= length) { //超过范围
-                start_idx = length - generate_num
-            }
-            let end_i = -1
-            let upbound = start_idx + generate_num
-            for (let i = start_idx; i < upbound; i++) {
-                if (line.station[i].exist == false && line.station[i].for_cell != null) {
-                    if ((line.station[i + 1] != null && line.station[i + 1].exist == true) ||
-                        (line.station[i - 1] != null && line.station[i - 1].exist == true)) {
-                        let cellindex = line.station[i].for_cell
-                        let station_data = this._packStationData(line.station[i], city, line, setting)
-                        this.metroMng.genStation(cellindex[0], cellindex[1], station_data)
+                // let city = this._randomGetCity()
+                // let line = this._randomGetLine(city)
+            var station_datas = []
+            let checked_line = [] //用于排除检查过的站点
+            while (generate_num != 0) {
+                let city = this._randomGetCity()
+                let line = this._randomGetLine(city, checked_line)
+                let start_idx = Math.floor(random() * line.station.length)
+                let upbound = start_idx + generate_num
+                upbound = upbound >= line.station.length ? line.station.length : upbound
+                checked_line.push(line)
+
+                for (let i = start_idx; i < upbound; i++) {
+                    if (line.station[i].exist == false) {
+                        station_datas.push(this._packStationData(line.station[i], city, line, setting))
+                        generate_num--
+                        if (generate_num == 0) break
                     } else {
-                        upbound = upbound > line.station.length ? line.station.length : upbound + 1 // 增加推进范围 尽量保持生成数量不变
+                        upbound = upbound >= line.station.length ? line.station.length : upbound + 1 // 增加推进范围 尽量保持生成数量不变
                     }
-                } else {
-                    if (end_i == -1) {
-                        start_idx = end_i = i
-                    } else if (i != end_i + 1) // 非连续区间
-                        break
-                    else
-                        end_i++
                 }
-            }
-            if (end_i != -1) {
-                let station_infos = line.station.slice(start_idx, end_i)
-                console.log(station_infos);
-                let station_datas = []
-                for (let i = 0; i < station_infos.length; i++) {
-                    station_datas.push(this._packStationData(station_infos[i], city, line, setting))
+                if (generate_num != 0) {
+                    for (let i = start_idx - 1; i > 0; i--) {
+                        if (line.station[i].exist == false) {
+                            station_datas.unshift(this._packStationData(line.station[i], city, line, setting))
+                            generate_num--
+                            if (generate_num == 0) break
+                        }
+                    }
                 }
-                let patterns = Object.keys(this.metro_patterns.patterns)
-                let pattern = this.metro_patterns.patterns[patterns[Math.floor(random() * patterns.length)]]
-                this.metroMng.randGenStatOfPattern(station_datas, pattern, station_datas.length)
+                if (station_datas.length != 0) {
+                    let patterns = Object.keys(this.metro_patterns.patterns)
+                    let pattern = this.metro_patterns.patterns[patterns[Math.floor(random() * patterns.length)]]
+                    this.metroMng.randGenStatOfPattern(station_datas, pattern, station_datas.length)
+                    station_datas.length = 0
+                }
             }
             let interval = setting.spawnning_interval + (random() - 0.5) * 2 * setting.spawnning_interval_var
             setTimeout(() => { this._canGen = true }, interval)
@@ -132,16 +130,40 @@ var LevelController = cc.Class({ //
         let occupied_cells = this.metroMng.getOccupiedCells()
     },
     // 私有
-    _randomGetCity() {
+    _randomGetCity(excepts) {
         let city_idx = Math.floor(random() * this.metroMng.station_datas.length) // 随机获取一个城市
-        return this.metroMng.station_datas[city_idx]
+        if (excepts != null) {
+            do {
+                var city = this.metroMng.station_datas[city_idx]
+                let circular_length = this.metroMng.station_datas.length - 1
+                city_idx = (city_idx + Math.floor(random() * circular_length)) + 1 // 为已检查过的站点
+            } while (excepts.indexOf(city) != -1)
+        } else {
+            var city = this.metroMng.station_datas[city_idx]
+        }
+        return city
     },
-    _randomGetLine(city) {
+    _randomGetLine(city, excepts) { //excepts 随机不能生成的对象
         if (city == null) {
             city = this._randomGetCity()
         }
-        let line_idx = Math.floor(random() * city.line_sta.length) // 随机获取一个城市
-        return city.line_sta[line_idx]
+        let line_idx = Math.floor(random() * city.line_sta.length) // 随机获取一个路线
+        let checked_city = []
+        if (excepts != null) {
+            let line_checked = 0
+            do {
+                var line = city.line_sta[line_idx]
+                let circular_length = city.line_sta.length - 1
+                line_idx = (line_idx + Math.floor(random() * circular_length)) + 1 // 为已检查过的站点
+                if (++line_checked >= city.line_sta.length) {
+                    checked_city.push(city)
+                    city = this._randomGetCity(checked_city)
+                }
+            } while (excepts.indexOf(line) != -1)
+        } else {
+            var line = city.line_sta[line_idx]
+        }
+        return line
     },
     _randomGetStataion(line) {
         if (line == null) {
@@ -164,8 +186,8 @@ var LevelController = cc.Class({ //
     _packStationData(station_info, city, line, setting) {
         var station_data = {}
         station_data.info = station_info
-        station_data.city = city //TODO 优化存储
-        station_data.line = line
+        station_data.city_data = city //TODO 优化存储
+        station_data.line_data = line
         station_data.population_limit = Math.getRandom(setting.pop_limit_std, setting.pop_limit_var, true)
         station_data.crowdFactor = Math.getRandom(setting.crowded_factor_std, setting.crowded_factor_var)
         station_data.fastigium_inverval = Math.getRandom(setting.fastigium_inverval, setting.fastigium_inverval_var)

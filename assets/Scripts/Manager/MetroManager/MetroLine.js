@@ -39,6 +39,7 @@ var MetroLine = cc.Class({
         this._state = States.BUILD
         this._next_state = States.BUILD // 下一个状态
         this.passed_stations = 0
+        this.cur_entity = null //记录当前的站点
     },
     onLoad() {
         this._initEffects()
@@ -77,9 +78,11 @@ var MetroLine = cc.Class({
         this.car_pos = null
         this.end_pos = null
         this.passed_stations = 0
+        this.cur_entity = null
+        this.extra_bonus = 0 // 额外的bonus计算
     },
     reuse: function(speed, bandwidth) {
-        this.speed = speed //TODO speed 将会从 车速 和 线路本身速度共同决定
+        this._default_speed = speed //TODO speed 将会从 车速 和 线路本身速度共同决定
         this.node.active = true;
     },
     // Manager 交互
@@ -89,6 +92,7 @@ var MetroLine = cc.Class({
             MetroLine.metro_mng.fadeLine(this)
             return
         }
+        this._computeExtraBonus() // 计算bonus
         this._next_state = States.RUN
     },
     build(pos, entity) { // 根据对应的新位置来 构建路线
@@ -102,6 +106,7 @@ var MetroLine = cc.Class({
         if (this.entities.length != 0 && entity == this.entities[this.entities.length - 1]) { // 如果和上一个站位为同一站则不添加
             return
         }
+        this.graphic.addRoute(entity, 1)
         this.entities.push(entity) // 可以重复加入同一个 站点
         return true;
     },
@@ -198,7 +203,10 @@ var MetroLine = cc.Class({
         }
     },
     /// Run
-    onRunEnter() {},
+    onRunEnter() {
+        let speed_factor = 1
+        this.speed = this._default_speed * (speed_factor + this.extra_bonus)
+    },
     onRun() {
         if (!this.graphic.hasRoute()) { // 运输完毕
             this._next_state = States.DONE
@@ -253,8 +261,8 @@ var MetroLine = cc.Class({
     onWaitEnter() {
         this.passed_stations++;
         this.graphic.onWaitEnter()
-        let cur_entity = this.entities[0]
-        cur_entity.wait(this).call(() => {
+        this.cur_entity = this.entities[0]
+        this.cur_entity.wait(this).call(() => {
             this._next_state = States.RUN
             let cur_entity = this.entities.shift() // count when u shift for score-computing
             if (!this.hasStation(cur_entity)) { // 其已经不在路线规划中了
@@ -328,5 +336,30 @@ var MetroLine = cc.Class({
         this.car.onRunExit()
         this.graphic.resetDrawing()
         MetroLine.metro_mng.fadeLine(this)
+    },
+    _computeExtraBonus() { //计算bonus bonus 用于加分
+        //this.extra_bonus
+        let entities = this.entities
+        let common_line = entities[0] // 判断
+        let sequenced = true // 是否有序（逆序或是正序）
+        var seq = null // 当前线路的正逆序 true 为正序 否则为逆序
+        for (let i = 1; i < entities.length - 1; i++) { // 不含终点
+            let seq_temp = entities[i].station_id > entities[i]
+            if (common_line != entities[i].line) {
+                sequenced = null
+                break
+            }
+            if (seq != null && seq != seq_temp) { // 序列非有序
+                sequenced = false
+            }
+        }
+        if (sequenced == null) { //非同一线路
+            this.extra_bonus = 1
+        } else if (sequenced == true) {
+            this.extra_bonus = 1.2
+        } else if (sequenced == false) {
+            this.extra_bonus = 1.4
+        }
     }
+
 });

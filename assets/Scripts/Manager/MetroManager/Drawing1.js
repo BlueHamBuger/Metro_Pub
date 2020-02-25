@@ -1,3 +1,4 @@
+var MetroLine = require("MetroLine")
 cc.Class({
     extends: require("Drawing"),
     properties: {
@@ -12,7 +13,7 @@ cc.Class({
         this.routes = []
         this.tail = null
         this.head = null
-        this.speed = 1
+        this.other_speed = 1
         this.cur_length = 0
         this._is_fading = false
     },
@@ -21,25 +22,36 @@ cc.Class({
     },
     Draw(touch_pos, entity) {
         let route_info = this.routes[this.routes.length - 1]
-        if (entity != null) { // 触碰到了 station
-            if (route_info != null) {
-                if (route_info.entity != entity) { //进入新的结点
-                    this._routeToward(route_info, entity.node.position)
-                } else {
-                    route_info.route.active = false
-                    return
-                }
-            }
-            var route = cc.instantiate(this.route_prefab) // TODO 路线对象池
-            this.routes.push({ route: route, entity: entity })
-            route.setParent(this._line.node)
-            route.setPosition(entity.node.position)
-            route.active = false
+        if (entity == route_info.entity) {
+            route_info.route.active = false
         } else if (route_info == null) {
             return
         } else {
             this._routeToward(route_info, touch_pos)
         }
+    },
+    addRoute(entity) {
+        let route_info = this.routes[this.routes.length - 1]
+        if (route_info != null) {
+            this._routeToward(route_info, entity.node.position)
+            var speed = 1
+            if (route_info.entity.city_data != null && entity.city_data != null) {
+                if (route_info.entity.city_data == entity.city_data) {
+                    speed += MetroLine.city_speed_bonus
+                    if (route_info.entity.line_data == entity.line_data) {
+                        speed += MetroLine.line_speed_bonus
+                    }
+                } else {
+                    speed += MetroLine.diff_city_speed_bonus
+                }
+            }
+            route_info.speed = speed
+        }
+        var route = cc.instantiate(this.route_prefab) // TODO 路线对象池
+        this.routes.push({ route: route, entity: entity, speed: 1 })
+        route.setParent(this._line.node)
+        route.setPosition(entity.node.position)
+        route.active = false
     },
     update(dt) {
         if (this._is_fading) {
@@ -55,7 +67,7 @@ cc.Class({
         this.startFade(speed)
     },
     onRun(speed) {
-        this.speed = speed
+        this.other_speed = speed
         this._is_fading = true
     },
     onWaitEnter() {
@@ -83,7 +95,7 @@ cc.Class({
         this.routes.length = 0
         this.tail = null
         this.head = null
-        this.speed = 1
+        this.other_speed = 1
         this.cur_length = 0
         this._is_fading = false
     },
@@ -102,7 +114,9 @@ cc.Class({
         if (this.routes.length == 0) return
         let route_info = this.routes[0]
         let route_length = route_info.route.height // 道路的长度
-        let forward_length = this.speed * 5
+        let forward_length = this.other_speed * route_info.speed * 5
+        console.log(route_info.speed);
+
         if (this.cur_length + forward_length >= route_length) {
             forward_length = route_length - this.cur_length
             this.cur_length = 0

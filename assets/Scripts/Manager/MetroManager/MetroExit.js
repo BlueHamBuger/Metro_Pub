@@ -51,7 +51,7 @@ var MetroExit = cc.Class({
     addScore(pop, line) { //  根据人流 和 线路信息 来计算分数
         // 如果 人流来自 人流的 自动位移 则 line 为 null
         // 返回 计算后的 分数
-        this.score += pop * (1 + (line.passed_stations - 1) * 0.5) //TODO 倍数设置
+        this.score += pop * (1 + (line.passed_stations - 1) * 0.5) * line.extra_bonus //TODO 倍数设置
         return this.score
     },
     // 状态

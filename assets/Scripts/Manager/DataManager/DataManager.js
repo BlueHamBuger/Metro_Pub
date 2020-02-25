@@ -72,10 +72,24 @@ cc.Class({
                 let maped_id = Math.mapInto(city_id)
                 city.color = cc.Color.getBrightColor(maped_id)
                 city.tex = this.station_sprites[Math.abs(maped_id % this.station_sprites.length)]
+                let city_hsv = city.color.toHSV()
+                cc.Color.prototype.fromHSV()
                 city.line_sta.forEach(line => {
+                    //console.log(Math.mapInto(maped_id + line.line_id))
+                    let num = Math.mapInto(maped_id + line.line_id)
+                    let bit8 = (1 << 8) - 1
+                    let h = city_hsv.h + ((num & bit8) / 255 - 0.5) * 2 * 0.1
+                    h = h > 1.0 ? 1.0 : (h < 0 ? 0 : h)
+                    num >>= 8
+                    let s = city_hsv.s + (num & bit8) / 255 * 0.1
+                    s = s > 1.0 ? 1.0 : s
+                    num >>= 8
+                    let v = city_hsv.v + (num & bit8) / 255 * 0.1
+                    v = v > 1.0 ? 1.0 : v
+                    line.color = new cc.Color()
+                    line.color.fromHSV(h, s, v)
                     line.station.forEach(sta => {
                         sta.exist = false // 站点是否被生成
-                        sta.for_cell = null // 之前占用的位置
                     })
                 });
             });

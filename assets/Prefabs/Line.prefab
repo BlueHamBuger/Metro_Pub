@@ -133,9 +133,10 @@
     "_enabled": true,
     "stdDistance": 20,
     "stdScale": 3,
+    "route_limit": 10,
     "rest_length": 0,
     "route_prefab": {
-      "__uuid__": "128faf35-3f44-4fbe-9f60-893e8476f1ef"
+      "__uuid__": "c63a6ab9-2836-4b78-bc8f-ebbcef1e44d6"
     },
     "_id": ""
   },

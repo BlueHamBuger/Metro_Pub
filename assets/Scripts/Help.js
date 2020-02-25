@@ -67,7 +67,7 @@ Math._xorShift_list = function() {
     return a
 }()
 Math.mapInto = (num) => {
-    return Math._xorShift_list[num % Math._xorShift_list.length]
+    return Math._xorShift_list[Math.abs(num) % Math._xorShift_list.length]
 }
 
 

@@ -16,7 +16,11 @@
         }
     },
     "line": {
-        "min_draw_distance": 4
+        "min_draw_distance": 4,
+        "city_speed_bonus": 0.1,
+        "sequenced_line_speed_factor": 0.2,
+        "line_speed_bonus": 0.1,
+        "diff_city_speed_bonus": -0.2
     },
     "car": {
         "car_props": [{

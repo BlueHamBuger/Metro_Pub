@@ -269,7 +269,7 @@
     "_srcBlendFactor": 770,
     "_dstBlendFactor": 771,
     "_spriteFrame": {
-      "__uuid__": "c47e0d74-7390-4794-ae4b-8b40d473c8fa"
+      "__uuid__": "b2514657-b056-4057-87e2-66502d51a04d"
     },
     "_type": 0,
     "_sizeMode": 1,
@@ -453,7 +453,7 @@
     "_texture": {
       "__uuid__": "3a2bf81f-48c8-44a6-9c98-deb66c125dc0"
     },
-    "_stopped": false,
+    "_stopped": true,
     "playOnLoad": true,
     "autoRemoveOnFinish": false,
     "totalParticles": 100,
@@ -560,7 +560,7 @@
     "_srcBlendFactor": 770,
     "_dstBlendFactor": 771,
     "_spriteFrame": {
-      "__uuid__": "7bd86c34-9517-43fe-83bb-4da2803e3194"
+      "__uuid__": "881e14e0-0dfa-42fa-b2a8-fb62bf782cb0"
     },
     "_type": 0,
     "_sizeMode": 1,

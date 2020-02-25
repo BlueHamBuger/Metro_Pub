@@ -442,7 +442,6 @@ var Metro = cc.Class({
         line = line.getComponent("MetroLine")
         this.cur_line = line
         return line
-
     },
     fadeLine(line) { // Line消去
         //let cellindex = this.getCellIndex(line.car_pos)

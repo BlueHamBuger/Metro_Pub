@@ -4,13 +4,9 @@ var State = window.GB_StationState = {
     Fastigium: 1,
     Vanish: 2,
 }
-var MetroStation = cc.Class({
-    extends: require("MetroEntity"),
-    statics: {
-        StateFunc: FSM.genFuncs(State)
-    },
+var StationApperance = cc.Class({ // MetroStation的 外观信息和更新逻辑
+    name: "StationApperance",
     properties: {
-        //组件
         name_text: {
             default: null,
             type: cc.Label,
@@ -23,6 +19,53 @@ var MetroStation = cc.Class({
             default: null,
             type: cc.Sprite
         },
+        particles: {
+            default: null,
+            type: cc.ParticleSystem
+        },
+        line_idx_sprite: {
+            default: null,
+            type: cc.Sprite,
+        },
+        line_idx_label: {
+            default: null,
+            type: cc.Label
+        },
+        line_name_label: {
+            default: null,
+            type: cc.Label
+        }
+
+    },
+    __ctor__(sta) {
+        this.metro_station = sta
+    },
+    init() {},
+    onReuse(station) {
+        this.name_text.string = station.info.station_name;
+        this.station_sprite.node.color = station.city_data.color; //TODO color 的设置细化
+        this.station_sprite.getComponent(cc.Sprite).spriteFrame = station.city_data.tex
+        this.line_idx_sprite.node.color = station.line_data.color
+        this.line_idx_sprite.spriteFrame = station.city_data.tex
+        this.line_idx_label.string = station.line_data.station.indexOf(station.info) + 1
+        this.line_name_label.string = station.line_data.line_name.split("号")[0]
+    },
+    onPopUpdate(value, limit) {
+        this.population_text.string = value + "\\" + limit;
+        this.particles.totalParticles = value / 2
+    },
+    getBoundingBox() {
+        return this.station_sprite.node.getBoundingBoxToWorld()
+    }
+
+
+})
+var MetroStation = cc.Class({
+    extends: require("MetroEntity"),
+    statics: {
+        StateFunc: FSM.genFuncs(State)
+    },
+    properties: {
         // 属性
         population_limit: { // 应该要和 车站的node 的 scale 挂钩
             default: 100,
@@ -36,8 +79,7 @@ var MetroStation = cc.Class({
             },
             set(value) {
                 this._cur_pop = value;
-                this.particles.totalParticles = this._cur_pop
-                    //cc.ParticleSystem.prototype.
+                //cc.ParticleSystem.prototype.
                 if (this.cur_population >= this.population_limit && !this.packed) {
                     this.packed = true
                 } else if (this.packed) {
@@ -46,29 +88,13 @@ var MetroStation = cc.Class({
                         this.fsm.setState(State.Vanish)
                     }
                 }
-                this.population_text.string = this.cur_population + "\\" + this.population_limit;
+                this.apperance.onPopUpdate(this.cur_population, this.population_limit)
             }
         },
         crowd_factor: 1, // 增长速率  应该和**挂钩
-        station_name: {
-            get() {
-                return this.name_text.string;
-            },
-            set(value) {
-                this.name_text.string = value;
-            }
-        },
         station_id: {
             default: 0,
             type: cc.Integer
-        },
-        color: {
-            get() {
-                return this.station_sprite.node.color;
-            },
-            set(value) {
-                this.station_sprite.node.color = value;
-            },
         },
         // 状态
         packed: {
@@ -86,14 +112,18 @@ var MetroStation = cc.Class({
                 this._packed = value
             }
         },
-        particles: {
+        apperance: {
             default: null,
-            type: cc.ParticleSystem
-        },
+            type: StationApperance
+        }
     },
     ctor() {
         this._packed = false
         this.fsm = new FSM(MetroStation.StateFunc, this)
+    },
+    init() {
+        this._super()
+        this.apperance.init()
     },
     update(dt) {
         this.fsm.update()
@@ -106,18 +136,20 @@ var MetroStation = cc.Class({
     //crowdFactor, name, color, cellindex, scale, 
     reuse: function(limit, station_info, cellindex, scale) { // 重用函数  
         this._super(cellindex, scale)
-        this.population_limit = station_info.population_limit
-        this.crowd_factor = station_info.crowdFactor;
-        this.station_name = station_info.info.station_name;
-        this.station_id = station_info.info.station_id
-        this.info = station_info.info // info 对应的是车站的真实数据
+            // this.population_limit = station_info.population_limit
+            // this.crowd_factor = station_info.crowdFactor;
+            // this.station_id = station_info.info.station_id
+            // this.info = station_info.info // info 对应的是车站的真实数据
+            // this.city_data = station_info.city
+            // this.line_data = station_info.line
+            // this.fastigium = station_info.fastigium //高峰期次数
+            // this.fastigium_pop = station_info.fastigium_pop
+            // this.fastigium_inverval = station_info.fastigium_inverval
+        for (const key in station_info) {
+            this[key] = station_info[key]
+        }
         this.info.exist = true
-        this.info.for_cell = cellindex
-        this.color = station_info.city.color; //TODO color 的设置细化
-        this.station_sprite.getComponent(cc.Sprite).spriteFrame = station_info.city.tex
-        this.fastigium = station_info.fastigium //高峰期次数
-        this.fastigium_pop = station_info.fastigium_pop
-        this.fastigium_inverval = station_info.fastigium_inverval
+        this.apperance.onReuse(this)
         this.cur_population = 0;
         this.anim.play("spawning")
     },
@@ -145,7 +177,7 @@ var MetroStation = cc.Class({
     },
     /// 状态
     isIn(pos) { // 判断 对应的 点的位置 是否在该station 的范围内
-        var bounding_rect = this.station_sprite.node.getBoundingBoxToWorld()
+        var bounding_rect = this.apperance.getBoundingBox()
         return bounding_rect.contains(pos);
     },
 
