@@ -191,7 +191,7 @@ var LevelController = cc.Class({ //
         station_data.population_limit = Math.getRandom(setting.pop_limit_std, setting.pop_limit_var, true)
         station_data.crowdFactor = Math.getRandom(setting.crowded_factor_std, setting.crowded_factor_var)
         station_data.fastigium_inverval = Math.getRandom(setting.fastigium_inverval, setting.fastigium_inverval_var)
-        station_data.fastigium = Math.getRandom(setting.fastigium_std, setting.fastigium_var)
+        station_data.fastigium = Math.getRandom(setting.fastigium_std, setting.fastigium_var, true)
         station_data.fastigium_pop = this._getFastigiumPop(station_data.population_limit, station_data.crowdFactor)
         return station_data
     }

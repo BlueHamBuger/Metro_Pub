@@ -22,10 +22,10 @@ cc.Class({
     },
     Draw(touch_pos, entity) {
         let route_info = this.routes[this.routes.length - 1]
-        if (entity == route_info.entity) {
-            route_info.route.active = false
-        } else if (route_info == null) {
+        if (route_info == null) {
             return
+        } else if (entity == route_info.entity) {
+            route_info.route.active = false
         } else {
             this._routeToward(route_info, touch_pos)
         }
@@ -115,8 +115,6 @@ cc.Class({
         let route_info = this.routes[0]
         let route_length = route_info.route.height // 道路的长度
         let forward_length = this.other_speed * route_info.speed * 5
-        console.log(route_info.speed);
-
         if (this.cur_length + forward_length >= route_length) {
             forward_length = route_length - this.cur_length
             this.cur_length = 0

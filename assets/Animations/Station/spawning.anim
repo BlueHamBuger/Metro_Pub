@@ -9,22 +9,6 @@
   "wrapMode": 1,
   "curveData": {
     "paths": {
-      "Particle": {
-        "comps": {
-          "cc.ParticleSystem": {
-            "emissionRate": [
-              {
-                "frame": 0,
-                "value": 0
-              },
-              {
-                "frame": 1,
-                "value": 100
-              }
-            ]
-          }
-        }
-      },
       "AnimationRoot": {
         "props": {
           "scale": [

@@ -78,7 +78,7 @@ var MetroCar = cc.Class({
     onRun(pos, dir) {
         if (dir == null) return
         let for_pos = this.car_head.getPosition();
-        let new_pos = for_pos.lerp(this.node.convertToNodeSpaceAR(pos), 0.25)
+        let new_pos = for_pos.lerp(this.node.convertToNodeSpaceAR(pos), 0.9)
         this.car_head.setPosition(new_pos);
         let angle = cc.Vec2.UP.signAngle(dir) * 180 / Math.PI;
         let new_angle = cc.misc.slerp(this.car_head.angle, angle - this.node.angle, 0.3)

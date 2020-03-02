@@ -1,6 +1,6 @@
 {
     "stations": {
-        "vanish_rate": 0.5
+        "pack_rate": 0.7
     },
     "metro": {
         "station_pool_size": 20,

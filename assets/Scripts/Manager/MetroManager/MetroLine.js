@@ -72,11 +72,16 @@ var MetroLine = cc.Class({
     unuse: function() {
         this.entities.length = 0
         this.speed = 1
-        this.state = States.BUILD
-        this._next_state = States.BUILD
+        this._state = null
+        this._next_state = null
         this.node.active = false
         this.car_pos = null
         this.end_pos = null
+        this.for_end_pos = null
+        this.idle_time = -1 // 触摸未移动的时间 -1代表未开始计数
+        this.touch_moved = false // 触摸是在否移动
+        this.wait_pop_delta = 0 // 等待时总共的变化值
+
         this.passed_stations = 0
         this.cur_entity = null
         this.extra_bonus = 0 // 额外的bonus计算
@@ -96,10 +101,14 @@ var MetroLine = cc.Class({
         this._next_state = States.RUN
     },
     build(pos, entity) { // 根据对应的新位置来 构建路线
-        if (this.car_pos == null)
-            this.car_pos = pos
-        this.end_pos = pos
+        // if (this.car_pos == null)
+        //     this.car_pos = pos
+        if (this.state == null) {
+            this._next_state = States.BUILD
+        }
+        this.touch_moved = true
         pos = this.node.convertToNodeSpaceAR(pos)
+        this.end_pos = pos
         this.graphic.Draw(pos, entity) // 更新视觉效果
     },
     addStation(entity) {
@@ -228,45 +237,59 @@ var MetroLine = cc.Class({
     },
     onBuild(deltatime) {
         // 视觉效果     
-        let adj_entities = MetroLine.metro_mng.getAdjancents(this.end_pos)
-        if (adj_entities != null && adj_entities.length != null) {
-            for (let i = 0; i < adj_entities.length; i++) {
-                let adj = adj_entities[i]
-                if (adj == null) {
-                    this.cnet_lines[i].active = false
-                    continue
+        if (this.touch_moved == false) {
+            this.idle_time += deltatime
+            if (this.idle_time >= 0.5) { // 按压一秒
+                let adj_entities = MetroLine.metro_mng.getAdjancents(this.end_pos)
+                if (adj_entities != null && adj_entities.length != null) {
+                    for (let i = 0; i < adj_entities.length; i++) {
+                        let adj = adj_entities[i]
+                        if (adj == null) {
+                            this.cnet_lines[i].active = false
+                            continue
+                        }
+                        let dir = adj.node.getPosition().sub(this.end_pos)
+                        let dist = dir.mag()
+                        if (this.cnet_lines[i].active == false) {
+                            this.cnet_lines[i].active = true
+                            this.cnet_lines[i].getComponent(cc.Animation).play()
+                        }
+                        this.cnet_lines[i].setPosition(this.end_pos)
+                        this.cnet_lines[i].height = dist
+                        this.cnet_lines[i].angle = Math.raduis2Angle(cc.Vec2.UP.signAngle(dir))
+                    }
                 }
-                let dir = adj.node.getPosition().sub(this.end_pos)
-                let dist = dir.mag()
-                if (this.cnet_lines[i].active == false) {
-                    this.cnet_lines[i].active = true
-                    this.cnet_lines[i].getComponent(cc.Animation).play()
-                }
-                this.cnet_lines[i].setPosition(this.end_pos)
-                this.cnet_lines[i].height = dist
-                this.cnet_lines[i].angle = Math.raduis2Angle(cc.Vec2.UP.signAngle(dir))
+            } else {
+                this.cnet_lines.forEach(cnet_line => {
+                    cnet_line.active = false
+                });
             }
         } else {
             this.cnet_lines.forEach(cnet_line => {
                 cnet_line.active = false
             });
+            this.idle_time = 0
         }
+
+        this.touch_moved = false
     },
     onBuildExit() {
         this.graphic.onBuildExit(this.speed)
-        this.car_pos = this.entities[0].node.position
+        this.car_pos = this.graphic.getTail()
         this.car.ready(this.car_pos, this.graphic.getDir())
     },
     /// Wait
     onWaitEnter() {
+        this.wait_pop_delta = 0
         this.passed_stations++;
         this.graphic.onWaitEnter()
         this.cur_entity = this.entities[0]
         this.cur_entity.wait(this).call(() => {
             this._next_state = States.RUN
-            let cur_entity = this.entities.shift() // count when u shift for score-computing
+            var cur_entity = this.entities.shift() // count when u shift for score-computing
             if (!this.hasStation(cur_entity)) { // 其已经不在路线规划中了
-                //TODO 响应出列
+                if (cur_entity.LineWaitExit)
+                    cur_entity.LineWaitExit(this)
             }
         }).start()
     },
@@ -307,7 +330,6 @@ var MetroLine = cc.Class({
 
     // 站点交互
     vanishStation(station) { // 站点消失回调
-        //TODO vanish
         let idx = this.entities.indexOf(station)
         let step = 0 // 前进步长
         for (let i = 0; i < this.entities.length; i++) {

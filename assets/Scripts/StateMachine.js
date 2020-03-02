@@ -16,6 +16,7 @@ var StateMachine = cc.Class({
     __ctor__(stateFuncs, entity) {
         this.state_bufffer = null // state 是在一帧内的确定的下一帧的状态 使用缓冲模式
         this.state = null // state 为当前的真实的状态
+        this.for_state = null // 前一个状态
         this.entity = entity
             // 属性定义
         this.onState = []
@@ -32,6 +33,7 @@ var StateMachine = cc.Class({
         });
     },
     reset(state) {
+        this.for_state = null
         this.state_bufffer = state
         this.state = state
     },
@@ -46,6 +48,7 @@ var StateMachine = cc.Class({
         if (this.state_bufffer != this.state) {
             this.callFunc(this.onStateEnter[this.state_bufffer])
             this.callFunc(this.onStateExit[this.state])
+            this.for_state = this.state
             this.state = this.state_bufffer
         }
         this.callFunc(this.onState[this.state])

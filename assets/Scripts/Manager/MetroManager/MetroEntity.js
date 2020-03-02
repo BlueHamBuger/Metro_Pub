@@ -17,6 +17,7 @@ function ByProgress(target, field_name, callback, callback_arg) {
         if (t == 1) { // its finished
             target.removeTween(that.tween)
         }
+        callback_arg.wait_pop_delta += delta
         return target[field_name] + delta
     }
 }

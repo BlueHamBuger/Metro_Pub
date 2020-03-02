@@ -2,7 +2,8 @@ var FSM = require("StateMachine")
 var State = window.GB_StationState = {
     Normal: 0,
     Fastigium: 1,
-    Vanish: 2,
+    Packed: 2,
+    Vanish: 3,
 }
 var StationApperance = cc.Class({ // MetroStation的 外观信息和更新逻辑
     name: "StationApperance",
@@ -53,6 +54,7 @@ var StationApperance = cc.Class({ // MetroStation的 外观信息和更新逻辑
     onPopUpdate(value, limit) {
         this.population_text.string = value + "\\" + limit;
         this.particles.totalParticles = value / 2
+        this.particles.angleVar = value / limit * 180
     },
     getBoundingBox() {
         return this.station_sprite.node.getBoundingBoxToWorld()
@@ -78,16 +80,22 @@ var MetroStation = cc.Class({
                 return Math.floor(this._cur_pop);
             },
             set(value) {
-                this._cur_pop = value;
-                //cc.ParticleSystem.prototype.
-                if (this.cur_population >= this.population_limit && !this.packed) {
-                    this.packed = true
-                } else if (this.packed) {
-                    let rate = (this.cur_population - this.population_limit) / this.population_limit
-                    if (rate >= MetroStation.vanish_rate) {
-                        this.fsm.setState(State.Vanish)
-                    }
+                this._cur_pop = value
+                if (this.cur_population >= this.population_limit) {
+                    this._cur_pop = this.population_limit
+                    let state = this.anim.getAnimationState("packing")
+                    state.repeatCount = 0
+                } else if (this.cur_population >= this.population_limit * MetroStation.pack_rate) {
+                    if (this.pend_packed == false) this.pend_packed = true
+                } else {
+                    this.pend_packed = false
                 }
+                // else if (this.pend_packed) {
+                //     let rate = (this.cur_population - this.population_limit) / this.population_limit
+                //     if (rate >= MetroStation.vanish_rate) { // 当爆满达到一定比例之后将会消失
+
+                //     }
+                // }
                 this.apperance.onPopUpdate(this.cur_population, this.population_limit)
             }
         },
@@ -97,19 +105,22 @@ var MetroStation = cc.Class({
             type: cc.Integer
         },
         // 状态
-        packed: {
+        pend_packed: {
             get() {
-                return this._packed
+                return this._pend_packed
             },
             set(value) {
-                if (value == this._packed)
+                if (value == this._pend_packed) {
                     return
-                else if (value == false) {
-
                 } else if (value == true) { // 播放动画等等
-
+                    let state = this.anim.getAnimationState("packing")
+                    state.repeatCount = Infinity
+                    this.anim.play("packing")
+                } else {
+                    let state = this.anim.getAnimationState("packing")
+                    state.repeatCount = 0
                 }
-                this._packed = value
+                this._pend_packed = value
             }
         },
         apperance: {
@@ -118,7 +129,7 @@ var MetroStation = cc.Class({
         }
     },
     ctor() {
-        this._packed = false
+        this._pend_packed = false
         this.fsm = new FSM(MetroStation.StateFunc, this)
     },
     init() {
@@ -136,18 +147,10 @@ var MetroStation = cc.Class({
     //crowdFactor, name, color, cellindex, scale, 
     reuse: function(limit, station_info, cellindex, scale) { // 重用函数  
         this._super(cellindex, scale)
-            // this.population_limit = station_info.population_limit
-            // this.crowd_factor = station_info.crowdFactor;
-            // this.station_id = station_info.info.station_id
-            // this.info = station_info.info // info 对应的是车站的真实数据
-            // this.city_data = station_info.city
-            // this.line_data = station_info.line
-            // this.fastigium = station_info.fastigium //高峰期次数
-            // this.fastigium_pop = station_info.fastigium_pop
-            // this.fastigium_inverval = station_info.fastigium_inverval
         for (const key in station_info) {
             this[key] = station_info[key]
         }
+        this.fsm.reset(null)
         this.info.exist = true
         this.apperance.onReuse(this)
         this.cur_population = 0;
@@ -210,29 +213,31 @@ var MetroStation = cc.Class({
     },
     // 状态机函数
     onFastigiumEnter() {
-        this.unschedule(this.crowdGrow)
         this.crowdIn(this.fastigium_pop, 2).call(() => { //高峰期持续 2s
+            // if (this.fsm.getState() == State.Vanish)
+            //     return
             this.fastigium--;
-            if (this.fastigium == 0) { //station 生命周期结束
-                this.fsm.setState(State.Vanish) // 生命周期结束 正常消失
-            } else {
-                this.fsm.setState(State.Normal)
-            }
+            this.fsm.setState(State.Normal)
         }).start()
     },
     onNormalEnter() {
         this.schedule(this.crowdGrow, 1 / this.crowd_factor); // 开始增长
-        this.scheduleOnce(() => { this.fsm.setState(State.Fastigium) }, 3) // 计划 进入高峰期
+        this.scheduleOnce(() => { if (this.fastigium != 0) this.fsm.setState(State.Fastigium) }, 3) // 计划 进入高峰期
+    },
+    onNormalExit() {
+        this.unschedule(this.crowdGrow)
     },
     onVanishEnter() {
-        if (this.packed) { //爆满消失
-            this.vanish()
+        for (let line of this._lines) {
+            line.vanishStation(this) // 通知包含该站点的 所有线路
+        }
+        this._lines.length = 0
+        if (this.cur_population >= this.population_limit) { //爆满消失
+            this.anim.play("packed_vanish")
         } else { // 正常消失
-            this.vanish()
+            this.anim.play("vanish")
         }
     },
-
-
 
     // Animation
     onFinished(type, state) { // animation 回调
@@ -240,6 +245,28 @@ var MetroStation = cc.Class({
             case "spawning":
                 this.fsm.setState(State.Normal)
                 break
+            case "packing":
+                if (this.pend_packed != false)
+                    this.fsm.setState(State.Vanish)
+                break
+            case "vanish":
+            case "packed_vanish":
+                MetroStation.metro_mng.vanishStation(this); // 站点消去
+                this.info.exist = false
+                break
+
+        }
+    },
+    // line交互
+    LineWaitExit(line) {
+        this._lines.remove(line)
+        if (this.fastigium == 0) { // 已经不会再有人流高潮了，将会在该次运输之后消失
+            if (this.pend_packed) {
+                let state = this.anim.getAnimationState("packing")
+                state.repeatCount = 0
+            } else {
+                this.fsm.setState(State.Vanish)
+            }
         }
     },
 
