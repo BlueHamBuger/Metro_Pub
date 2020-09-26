@@ -286,6 +286,7 @@ var MetroLine = cc.Class({
         this.cur_entity = this.entities[0]
         this.cur_entity.wait(this).call(() => {
             this._next_state = States.RUN
+            if(this.entities == null) return
             var cur_entity = this.entities.shift() // count when u shift for score-computing
             if (!this.hasStation(cur_entity)) { // 其已经不在路线规划中了
                 if (cur_entity.LineWaitExit)

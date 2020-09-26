@@ -4,8 +4,9 @@ var State = window.GB_StationState = {
     Takein: 1, // 人流入
     Vanish: 2,
 }
+var MetroEntity = require("MetroEntity")
 var MetroExit = cc.Class({
-    extends: require("MetroEntity"),
+    extends: MetroEntity,
     properties: {
         score: {
             get() {
@@ -13,7 +14,8 @@ var MetroExit = cc.Class({
             },
             set(value) {
                 this._score = value
-                console.log("score:" + this._score);
+                MetroEntity.MetroMng.gameMng.score = this._score
+
             }
         },
 

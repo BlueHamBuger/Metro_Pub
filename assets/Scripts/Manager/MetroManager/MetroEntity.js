@@ -9,7 +9,11 @@ function ByProgress(target, field_name, callback, callback_arg) {
         acc_delta += delta
         added = new_added
         if (Math.abs(acc_delta) >= 1) {
-            delta = callback(that.tween, Math.floor(acc_delta), callback_arg)
+            try {
+                delta = callback(that.tween, Math.floor(acc_delta), callback_arg)
+            } catch (error) {
+                return;
+            }
             acc_delta = acc_delta - delta
         } else {
             delta = 0
@@ -17,7 +21,8 @@ function ByProgress(target, field_name, callback, callback_arg) {
         if (t == 1) { // its finished
             target.removeTween(that.tween)
         }
-        callback_arg.wait_pop_delta += delta
+        if (callback_arg != null)
+            callback_arg.wait_pop_delta += delta
         return target[field_name] + delta
     }
 }
@@ -39,7 +44,8 @@ var MetroEntity = cc.Class({
         EntityType: {
             EXIT: 0,
             STATION: 1,
-        }
+        },
+        MetroMng: null,
     },
     ctor() {
         this.entity_type = MetroEntity.EntityType.STATION // entity 类型
@@ -66,6 +72,7 @@ var MetroEntity = cc.Class({
         this._tweens.length = 0
     },
     removeTween(tween) {
+        if(this._tweens == null) return
         this._tweens.remove(tween)
     },
     // MetroManager 调用接口
@@ -91,6 +98,7 @@ var MetroEntity = cc.Class({
         this._clearTweens()
     },
     reuse: function(cellindex, scale) { // 重用函数  
+        
         this.node.active = true;
         this.cellindex = cellindex;
         this.default_scale = cc.v2(scale, scale);

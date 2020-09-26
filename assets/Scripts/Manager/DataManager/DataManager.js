@@ -93,7 +93,6 @@ cc.Class({
                     })
                 });
             });
-            console.log(this.station_datas);
 
             callback(err)
         })

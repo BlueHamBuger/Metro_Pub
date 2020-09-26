@@ -1,0 +1,74 @@
+// Copyright (c) 2017-2018 Xiamen Yaji Software Co., Ltd.  
+
+CCEffect %{
+  techniques:
+  - passes:
+    - vert: vs
+      frag: fs
+      blendState:
+        targets:
+        - blend: true
+      rasterizerState:
+        cullMode: none
+      properties: 
+        diffuseColor : { value: [1,1,1,1], inspector: { type: color } }
+        blockColor : { value: [1,1,1,1], inspector: { type: color } }
+        # 在 放置范围内导致无法放置的颜色
+        inBlockColor : { value: [1,1,1,1], inspector: { type: color } }
+        blockFactor : {value: 0.7}        
+        texture: { value: white }
+}%
+
+
+CCProgram vs %{
+  precision highp float;
+
+  #include <cc-global>
+  #include <cc-local>
+  #include <input-standard>
+  #if USE_TEXTURE
+  out vec2 v_uv0;
+  #endif
+
+  void main () {
+    StandardVertInput In;
+    CCVertInput(In);
+
+    vec4 pos = cc_matViewProj * cc_matWorld * In.position;
+    #if USE_TEXTURE
+    v_uv0 =In.uv;
+    #endif
+
+    gl_Position = pos;
+  }
+}%
+ 
+
+CCProgram fs %{
+  precision highp float; 
+  
+  #if USE_TEXTURE 
+  in vec2 v_uv0;
+  uniform sampler2D texture;
+  #endif
+  uniform UniformDatas{
+    vec4 diffuseColor;
+    vec4 blockColor;
+    vec4 inBlockColor;
+    float blockFactor;
+    // 0.0 表示 不可建立
+    //1.0 表示可以
+    float construcable = 1.0; 
+  };
+
+  void main () {
+    vec4 o = vec4(1, 1, 1, 1.0);
+    #if USE_TEXTURE
+    o *= texture(texture, v_uv0);
+    #endif
+    o *= diffuseColor;
+    vec4 tar_color = mix(inBlockColor,blockColor,construcable);
+    o = mix(o,tar_color,blockFactor);
+    gl_FragColor = o;
+  }
+}%

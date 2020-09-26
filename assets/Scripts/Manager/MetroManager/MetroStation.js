@@ -96,7 +96,11 @@ var MetroStation = cc.Class({
 
                 //     }
                 // }
-                this.apperance.onPopUpdate(this.cur_population, this.population_limit)
+                try {
+                    this.apperance.onPopUpdate(this.cur_population, this.population_limit)
+                } catch (error) {
+                    return
+                }
             }
         },
         crowd_factor: 1, // 增长速率  应该和**挂钩
@@ -217,6 +221,7 @@ var MetroStation = cc.Class({
             // if (this.fsm.getState() == State.Vanish)
             //     return
             this.fastigium--;
+            if(this.fsm == null) return
             this.fsm.setState(State.Normal)
         }).start()
     },

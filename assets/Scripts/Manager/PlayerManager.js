@@ -19,7 +19,7 @@ cc.Class({
             type: cc.Integer,
         },
         coin: {
-            default: 0,
+            default: 1000,
             type: cc.Integer,
         },
         car_selected: { // 玩家当前选择的车辆
@@ -30,6 +30,12 @@ cc.Class({
     initManager(gameMng) {
         this._super(gameMng)
 
+    },
+    addCoin(n) {
+        this.coin += n
+    },
+    spendCoin(n) {
+        this.coin -= n
     }
     // LIFE-CYCLE CALLBACKS:
 

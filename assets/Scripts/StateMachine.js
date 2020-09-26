@@ -43,21 +43,24 @@ var StateMachine = cc.Class({
     getState() {
         return this.state
     },
-    update() {
+    update(dt) {
         if (this.state_bufffer == null && this.state == null) return
         if (this.state_bufffer != this.state) {
-            this.callFunc(this.onStateEnter[this.state_bufffer])
             this.callFunc(this.onStateExit[this.state])
+            this.callFunc(this.onStateEnter[this.state_bufffer])
             this.for_state = this.state
             this.state = this.state_bufffer
         }
-        this.callFunc(this.onState[this.state])
+        this.callFunc(this.onState[this.state], [dt])
     },
-    callFunc(func) {
+    callFunc(func, args) {
         if (func == null) {
             return null
         } else {
-            return func.call(this.entity)
+            if (args != null)
+                return func.call(this.entity, ...args)
+            else
+                return func.call(this.entity)
         }
     }
 

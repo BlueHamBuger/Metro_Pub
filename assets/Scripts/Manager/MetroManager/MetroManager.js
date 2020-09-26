@@ -3,6 +3,7 @@
 var MetroLine = require("MetroLine")
 var MetroStation = require("MetroStation")
 var LevelController = require("LevelController")
+var MetroEntity = require("MetroEntity")
 var Metro = cc.Class({
     extends: require("BaseManager"),
     properties: {
@@ -83,9 +84,9 @@ var Metro = cc.Class({
             graphic.lineTo(i * this.cellwidth, this.height)
         }
         graphic.stroke();
-
-        // for (let i = 0; i < 10; i++)
-        //     this.randomGenStation();
+        MetroEntity.MetroMng = this
+            // for (let i = 0; i < 10; i++)
+            //     this.randomGenStation();
     },
     //事件 及 回调函数
     _initEvents() {
@@ -455,5 +456,8 @@ var Metro = cc.Class({
     getEffect(id, idx) {
         return this.gameMng.dataMng.getEffect(id, idx)
     },
+    exit(){
+        
+    }
     // 私有幫助函數
 })

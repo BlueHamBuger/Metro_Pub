@@ -1,0 +1,34 @@
+{
+  "ver": "2.3.3",
+  "uuid": "3c35e483-058d-4e9b-9c07-c29d8d43b805",
+  "type": "sprite",
+  "wrapMode": "clamp",
+  "filterMode": "bilinear",
+  "premultiplyAlpha": false,
+  "genMipmaps": false,
+  "packable": true,
+  "platformSettings": {},
+  "subMetas": {
+    "Avenio_1_d": {
+      "ver": "1.0.4",
+      "uuid": "df656643-96f6-407d-91f7-d0d8b37cd306",
+      "rawTextureUuid": "3c35e483-058d-4e9b-9c07-c29d8d43b805",
+      "trimType": "auto",
+      "trimThreshold": 1,
+      "rotated": false,
+      "offsetX": 0,
+      "offsetY": 0,
+      "trimX": 0,
+      "trimY": 0,
+      "width": 512,
+      "height": 512,
+      "rawWidth": 512,
+      "rawHeight": 512,
+      "borderTop": 0,
+      "borderBottom": 0,
+      "borderLeft": 0,
+      "borderRight": 0,
+      "subMetas": {}
+    }
+  }
+}

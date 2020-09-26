@@ -12,15 +12,8 @@ cc.Class({
             },
         }
     },
-    properties: {
-        drawing: {
-            default: null,
-            type: require("Drawing"),
-        },
-    },
+    properties: {},
     // LIFE-CYCLE CALLBACKS:
-
-    // onLoad () {},
     initManager(gameMng) {
 
 
